@@ -47,7 +47,7 @@ window.onload = (event) => {
     addAllatag();
     fillinMyWordUrl();
     myModeIs();
-    
+
     addAllFrame();
     openAllFrame();
     myModeIs();
@@ -56,7 +56,8 @@ window.onload = (event) => {
 //function
 function splitMyUrl(){//related:addCustomUrl() decodeMyWord()
     //slipturl and make dictionary link, frame
-    var temp = location.href.split("?");
+    var temp = location.href.split("#");
+    var temp = temp[0].split("?");
     if (temp[1] != "" ){
         var temp = temp[1].split("&");
         for (var i = 0; i < temp.length; i++) {
@@ -67,7 +68,7 @@ function splitMyUrl(){//related:addCustomUrl() decodeMyWord()
                 var value = "未設定";
             }
             console.log(config[0] +" 值為 "+ value);
-            
+
             //參數 方法 fo(frame open) cdic(custom dic)
             if (config[0] == "myWord"){
                 var myWord = decodeMyWord(config[1]);
@@ -102,6 +103,8 @@ function splitMyUrl(){//related:addCustomUrl() decodeMyWord()
             }else if (config[0] == "mode"){//not in form
                 if (config[1] == "anki"){
                     Config.mode = "anki";
+                }else if (config[1] == "webExtension"){
+                    Config.mode = "webExtension";
                 }
             }
         };
@@ -110,7 +113,7 @@ function splitMyUrl(){//related:addCustomUrl() decodeMyWord()
 
 function addtobtn(){
     var x = document.getElementById("addtobtn");
-    x.innerHTML = '<a href="javascript:;" onclick="gotoconfigto()"> TO'+Config.to+'</a>';
+    x.innerHTML = '<a href="javascript:;" onclick="gotoconfigto()" class="nav-link">TO '+Config.to+'</a>';
 }
 
 function gotoconfigto(){
@@ -138,18 +141,24 @@ function fillinMyWord(){
 function addAllatag(){
     if (Config.myWord != ""){
         var DicLink = document.getElementById("myDicLink");
-        DicLink.innerHTML  = '<button type="button" onclick="openAllTab()" class="myButton ankimode-none">彈出所有視窗</button><br>';
-        
+        var mymodal = document.getElementById("DicLink");
+        DicLink.innerHTML  = '<button type="button" onclick="openAllTab()" class="btn btn-primary">彈出所有視窗</button>';
+        DicLink.innerHTML += '<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#DicLink-modal" id="">字典連結</button>'
+
         for (var i = 0; i < Dic.length; i++) {
             var dicname = Dic[i][0];
-            DicLink.innerHTML += '<a id="engine-a-'+i+'" href="" target="_blank" rel="nofollow" class="DicLink ankimode-none">'+dicname+'</a><br>';
+            mymodal.innerHTML += '<a id="engine-a-'+i+'" href="" target="_blank" rel="nofollow" class="DicLink">'+dicname+'</a><hr>';
         };
-        DicLink.innerHTML += '<p>在這裡開啟</p><hr>';
+
+        DicLink.innerHTML += '<hr><p class="text-align-center">在這裡開啟</p><hr>';
+        DicLink.innerHTML += '<ul class="nav nav-tabs" id="framenavtabs"></ul>';
+        var nav = document.getElementById("framenavtabs");
         for (var i = 0; i < Dic.length; i++) {
             var dicname = Dic[i][0];
-            DicLink.innerHTML += '<a id="engine-a-frame-'+i+'" href="" target="Diciframe" rel="nofollow" class="DicLink">'+dicname+'</a><br>';
+            nav.innerHTML += '<li class="nav-item"><a class="nav-link" id="engine-a-frame-'+i+'" rel="nofollow" href="" target="Diciframe">'+dicname+'</a></li>';
+            //DicLink.innerHTML += '<a id="engine-a-frame-'+i+'" href="" target="Diciframe" rel="nofollow" class="DicLink">'+dicname+'</a><br>';
         };
-        DicLink.innerHTML += '<br><iframe src="" id="Diciframe" name="Diciframe" class="Diciframe"></iframe><br>';
+        DicLink.innerHTML += '<iframe src="" id="Diciframe" name="Diciframe" width="100%" height="550px"></iframe>';
     }
 }//end
 
@@ -169,10 +178,10 @@ function fillinMyWordUrl(){
 function addAllFrame(){
     if (Config.fo == "y"){
         var DicFrame = document.getElementById("myDicFrame");
-        DicFrame.innerHTML = '<p>內嵌視窗</p><hr><button type="button" onclick="reloadAllFrame()" class="myButton">重新整理內嵌視窗</button><br><br>';
+        DicFrame.innerHTML = '<hr><p class="text-align-center">內嵌視窗</p><hr><button type="button" onclick="reloadAllFrame()" class="myButton">重新整理內嵌視窗</button><br><br>';
         for (var i = 0; i < Dic.length; i++) {
             var nowFrame = "iframe-"+i;
-            DicFrame.innerHTML += '<iframe src="" title="" id="'+nowFrame+'" name="'+nowFrame+'" class="Diciframe"></iframe><br>';
+            DicFrame.innerHTML += '<iframe src="" title="" id="'+nowFrame+'" name="'+nowFrame+'" class="Diciframe" width="100%" height="550px"></iframe><br>';
         };
     }
 }//end
@@ -212,7 +221,7 @@ function addCustomUrl(url) {
     Dic.unshift([]);
     console.log("解碼："+dec);
     Dic[0].unshift(dec);
-    Dic[0].unshift("custom");
+    Dic[0].unshift("https://alsonow.neocities.org/");
     Dic[0].unshift("custom");
     var cdic = document.getElementById("cdic");
     if (cdic.value != ""){
@@ -230,12 +239,12 @@ function decodeMyWord(url){
 }
 
 function listAllDic(){
-    var x = "有"+Dic.length+"個字典：\n";
+    var x = "共有"+Dic.length+"個字典：<br>";
     for (var i = 0; i < Dic.length; i++) {
-        var x = x+"---\n";
-        var x = x+Dic[i][0]+"："+Dic[i][1]+"\n";
+        var x = x+"<hr>";
+        var x = x+"<a target='_blank' href='"+Dic[i][1]+"'>"+Dic[i][0]+"</a><br>";
     };
-    alert(x);
+    document.getElementById("listAllDicFillin").innerHTML = "<div>"+x+"</div>";
 }//end
 
 function generateLocationQRCODE(){//related myLocationis()
@@ -256,6 +265,8 @@ function myLocationis(){
 function myModeIs(){
     if (Config.mode == "anki"){
         ankimode();
+    }else if (Config.mode == "webExtension") {
+        webExtensionmode();
     }
 }//end
 
@@ -266,6 +277,9 @@ function ankimode(){
 	}
     var footer = document.getElementById("footer");
     var alsonow = document.getElementById("alsonowandmyword");
-    footer.style = "margin-top:1.5em;";
     alsonow.innerHTML = '加油！卡片快做完了 <a href="https://alsonow.neocities.org/EE/">alsonow英英</a>'
+}//end
+
+function webExtensionmode(){
+
 }//end
